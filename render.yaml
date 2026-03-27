@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: fluw-assistant
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn --chdir backend main:app
+    envVars:
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: PHONE_NUMBER_ID
+        sync: false
+      - key: VERIFY_TOKEN
+        value: fluw_secret_2024
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TEAM_PHONE_NUMBER
+        sync: false
+      - key: DASHBOARD_USER
+        value: fluw_admin
+      - key: DASHBOARD_PASS
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: PORT
+        value: 10000

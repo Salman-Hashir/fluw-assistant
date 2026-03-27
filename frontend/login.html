@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FLUW — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#060a10;
+  --surface:#0d1420;
+  --border:rgba(255,255,255,0.08);
+  --accent:#4fffb0;
+  --accent2:#3de0ff;
+  --text:#e8edf5;
+  --muted:#5a6a88;
+  --error:#ff5c5c;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+/* animated background */
+.bg-anim{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(79,255,176,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 50%, rgba(61,224,255,0.05) 0%, transparent 60%);
+}
+.grid{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(79,255,176,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,255,176,0.02) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+
+/* floating orbs */
+.orb{
+  position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;
+  animation:drift 10s ease-in-out infinite alternate;
+}
+.orb1{width:300px;height:300px;background:rgba(79,255,176,0.07);top:-80px;left:-80px;}
+.orb2{width:250px;height:250px;background:rgba(61,224,255,0.06);bottom:-60px;right:-60px;animation-delay:-5s;}
+@keyframes drift{0%{transform:translate(0,0);}100%{transform:translate(30px,20px);}}
+
+/* card */
+.card{
+  position:relative;z-index:1;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:44px 40px 40px;
+  width:100%;max-width:400px;
+  box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(79,255,176,0.05);
+  animation:fadeUp 0.5s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.card::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:60%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(79,255,176,0.4),transparent);
+}
+
+/* logo */
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;justify-content:center;}
+.logo-mark{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#060a10;
+  box-shadow:0 0 24px rgba(79,255,176,0.3);
+}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+.headline{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;text-align:center;margin-bottom:6px;}
+.subline{font-size:13px;color:var(--muted);text-align:center;margin-bottom:32px;}
+
+/* form */
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;font-weight:500;}
+.field input{
+  width:100%;background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:10px;
+  padding:13px 16px;color:var(--text);font-size:14px;
+  font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.field input:focus{border-color:rgba(79,255,176,0.4);box-shadow:0 0 0 3px rgba(79,255,176,0.08);}
+.field input::placeholder{color:var(--muted);}
+
+/* password toggle */
+.pass-wrap{position:relative;}
+.pass-wrap input{padding-right:44px;}
+.toggle-pass{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:var(--muted);
+  font-size:16px;padding:4px;transition:color 0.2s;
+}
+.toggle-pass:hover{color:var(--text);}
+
+/* btn */
+.btn-login{
+  width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#060a10;font-weight:700;font-size:15px;font-family:'Syne',sans-serif;
+  letter-spacing:0.5px;margin-top:8px;
+  box-shadow:0 4px 20px rgba(79,255,176,0.25);
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(79,255,176,0.35);}
+.btn-login:active{transform:translateY(0);}
+.btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* spinner inside btn */
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid rgba(6,10,16,0.3);
+  border-top-color:#060a10;border-radius:50%;
+  animation:spin 0.7s linear infinite;vertical-align:middle;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* error */
+.error-msg{
+  background:rgba(255,92,92,0.1);border:1px solid rgba(255,92,92,0.2);
+  border-radius:8px;padding:11px 14px;font-size:13px;color:var(--error);
+  margin-bottom:16px;display:none;text-align:center;
+}
+.error-msg.show{display:block;animation:shake 0.3s ease;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* aria badge */
+.aria-badge{
+  display:flex;align-items:center;gap:8px;justify-content:center;
+  margin-top:24px;padding-top:20px;border-top:1px solid var(--border);
+  font-size:12px;color:var(--muted);
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 6px var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* mobile */
+@media(max-width:480px){
+  body{align-items:flex-start;padding-top:40px;}
+  .card{margin:16px;padding:32px 24px 28px;border-radius:16px;max-width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="bg-anim"></div>
+<div class="grid"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-mark">F</div>
+    <div class="logo-text">FLUW</div>
+  </div>
+
+  <div class="headline">Welcome back</div>
+  <div class="subline">Sign in to your AI Assistant dashboard</div>
+
+  <div class="error-msg" id="err">Invalid username or password</div>
+
+  <div class="field">
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter username" autocomplete="username" autofocus/>
+  </div>
+
+  <div class="field">
+    <label>Password</label>
+    <div class="pass-wrap">
+      <input type="password" id="password" placeholder="Enter password" autocomplete="current-password"/>
+      <button class="toggle-pass" onclick="togglePass()" type="button" id="eye-btn">👁</button>
+    </div>
+  </div>
+
+  <button class="btn-login" id="login-btn" onclick="doLogin()">Sign In →</button>
+
+  <div class="aria-badge">
+    <span class="dot"></span>
+    Aria is online and responding 24/7
+  </div>
+</div>
+
+<script>
+// Enter key to login
+document.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function togglePass(){
+  const inp = document.getElementById('password');
+  const btn = document.getElementById('eye-btn');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else { inp.type='password'; btn.textContent='👁'; }
+}
+
+async function doLogin(){
+  const btn  = document.getElementById('login-btn');
+  const err  = document.getElementById('err');
+  const user = document.getElementById('username').value.trim();
+  const pass = document.getElementById('password').value.trim();
+
+  if(!user || !pass){ showErr('Please fill in all fields'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in...';
+  err.classList.remove('show');
+
+  try{
+    const res = await fetch('/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({username: user, password: pass})
+    });
+    const data = await res.json();
+    if(data.success){
+      btn.innerHTML = '✓ Success!';
+      setTimeout(()=>{ window.location.href='/'; }, 400);
+    } else {
+      showErr(data.message || 'Invalid credentials');
+      btn.disabled = false;
+      btn.innerHTML = 'Sign In →';
+    }
+  } catch(e){
+    showErr('Connection error. Try again.');
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In →';
+  }
+}
+
+function showErr(msg){
+  const err = document.getElementById('err');
+  err.textContent = msg;
+  err.classList.remove('show');
+  void err.offsetWidth;
+  err.classList.add('show');
+}
+</script>
+</body>
+</html>

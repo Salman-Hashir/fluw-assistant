@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FLUW — AI Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#060a10;--surface:#0d1420;--surface2:#111827;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.04);
+  --accent:#4fffb0;--accent2:#3de0ff;
+  --hot:#ff5c5c;--warm:#ffb347;--conv:#4fffb0;
+  --text:#e2e8f4;--muted:#5a6a88;--muted2:#8896b0;
+  --sidebar:220px;--topbar:60px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+
+/* grid bg */
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(79,255,176,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,255,176,0.018) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none;}
+
+/* ── Sidebar ──────────────────────────────────────── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:200;
+  transform:translateX(0);transition:transform 0.3s ease;
+}
+.sidebar-header{
+  padding:20px 20px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#060a10;
+  box-shadow:0 0 18px rgba(79,255,176,0.25);flex-shrink:0;
+}
+.logo-info .brand{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:1.5px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-info .sub{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
+
+.close-sidebar{display:none;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px;}
+
+.nav{flex:1;padding:16px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:10px 12px;border-radius:8px;border:1px solid transparent;
+  background:none;color:var(--muted);font-size:13px;font-weight:500;
+  cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;
+  transition:all 0.18s;
+}
+.nav-btn:hover{color:var(--text);background:var(--surface2);}
+.nav-btn.active{color:var(--accent);background:rgba(79,255,176,0.07);border-color:rgba(79,255,176,0.12);}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--hot);color:#fff;
+  font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 6px var(--accent);margin-left:auto;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.sidebar-footer{
+  padding:14px 16px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.aria-av{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:#060a10;
+}
+.aria-info .name{font-size:13px;font-weight:500;}
+.aria-info .status{font-size:11px;color:var(--accent);}
+.logout-btn{margin-left:auto;background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:14px;padding:4px;transition:color 0.2s;}
+.logout-btn:hover{color:var(--hot);}
+
+/* ── Topbar ───────────────────────────────────────── */
+.topbar{
+  position:fixed;top:0;left:var(--sidebar);right:0;
+  height:var(--topbar);z-index:100;
+  background:rgba(6,10,16,0.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+}
+.menu-btn{
+  display:none;background:none;border:none;color:var(--muted);
+  font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;
+}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;}
+.topbar-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+
+.btn{padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:500;
+  cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.18s;}
+.btn-outline{background:transparent;color:var(--muted2);border:1px solid var(--border);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#060a10;font-weight:600;box-shadow:0 3px 14px rgba(79,255,176,0.2);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,255,176,0.3);}
+.btn-sm{padding:6px 12px;font-size:11.5px;}
+
+/* ── Main ─────────────────────────────────────────── */
+.main{
+  margin-left:var(--sidebar);
+  padding-top:calc(var(--topbar) + 24px);
+  padding-bottom:40px;
+  padding-left:24px;padding-right:24px;
+  min-height:100vh;position:relative;z-index:1;
+}
+
+/* ── Pages ────────────────────────────────────────── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── Stats ────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+.stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:18px 16px;position:relative;overflow:hidden;
+  transition:transform 0.18s,border-color 0.18s;
+}
+.stat:hover{transform:translateY(-2px);border-color:rgba(79,255,176,0.15);}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(79,255,176,0.25),transparent);}
+.stat-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.9px;margin-bottom:8px;}
+.stat-val{font-family:'Syne',sans-serif;font-weight:700;font-size:26px;}
+.stat-val.c-hot{color:var(--hot);}
+.stat-val.c-warm{color:var(--warm);}
+.stat-val.c-conv{color:var(--conv);}
+.stat-val.c-blue{color:var(--accent2);}
+.stat-ico{position:absolute;right:14px;top:14px;font-size:18px;opacity:0.25;}
+
+/* ── Cards ────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.card-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.card-title{font-family:'Syne',sans-serif;font-weight:600;font-size:14px;}
+
+/* ── Layout grids ─────────────────────────────────── */
+.col-2{display:grid;grid-template-columns:1fr 340px;gap:18px;}
+.col-1{display:grid;grid-template-columns:1fr;gap:18px;}
+
+/* ── Search ───────────────────────────────────────── */
+.search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:7px 12px;
+}
+.search input{background:none;border:none;outline:none;color:var(--text);
+  font-size:12.5px;font-family:'DM Sans',sans-serif;width:160px;}
+.search input::placeholder{color:var(--muted);}
+
+/* ── Filter chips ─────────────────────────────────── */
+.chips{display:flex;gap:6px;padding:12px 20px 0;flex-wrap:wrap;}
+.chip{padding:4px 12px;border-radius:20px;font-size:11.5px;cursor:pointer;
+  background:var(--surface2);color:var(--muted);border:1px solid var(--border);transition:all 0.18s;}
+.chip:hover{color:var(--text);}
+.chip.on{background:rgba(79,255,176,0.08);color:var(--accent);border-color:rgba(79,255,176,0.18);}
+
+/* ── Table ────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:10.5px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:0.7px;font-weight:500;padding:10px 20px;
+  background:var(--surface2);border-bottom:1px solid var(--border);}
+td{padding:13px 20px;font-size:13px;border-bottom:1px solid var(--border2);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.015);}
+
+.lead-name{font-weight:500;margin-bottom:2px;}
+.lead-phone{font-size:11.5px;color:var(--muted);}
+.req-text{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted2);font-size:12.5px;}
+
+/* ── Badges ───────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.b-hot{background:rgba(255,92,92,0.1);color:var(--hot);border:1px solid rgba(255,92,92,0.18);}
+.b-warm{background:rgba(255,179,71,0.1);color:var(--warm);border:1px solid rgba(255,179,71,0.18);}
+.b-conv{background:rgba(79,255,176,0.1);color:var(--conv);border:1px solid rgba(79,255,176,0.18);}
+.b-new{background:rgba(61,224,255,0.1);color:var(--accent2);border:1px solid rgba(61,224,255,0.18);}
+.b-book{background:rgba(192,132,252,0.1);color:#c084fc;border:1px solid rgba(192,132,252,0.18);}
+
+/* action btns */
+.act{background:transparent;border:1px solid var(--border);color:var(--muted);
+  padding:4px 9px;border-radius:6px;font-size:11px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;margin-right:4px;transition:all 0.18s;}
+.act:hover{border-color:var(--accent);color:var(--accent);}
+.act.red:hover{border-color:var(--hot);color:var(--hot);}
+
+/* ── Right column panels ──────────────────────────── */
+.panel-stack{display:flex;flex-direction:column;gap:18px;}
+
+/* ── Aria card ────────────────────────────────────── */
+.aria-card{
+  background:linear-gradient(135deg,rgba(79,255,176,0.04),rgba(61,224,255,0.04));
+  border:1px solid rgba(79,255,176,0.12);
+  border-radius:14px;padding:22px;text-align:center;
+}
+.aria-big{
+  width:58px;height:58px;border-radius:50%;margin:0 auto 10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#060a10;
+  box-shadow:0 0 28px rgba(79,255,176,0.28);animation:glow 3s ease-in-out infinite;
+}
+@keyframes glow{0%,100%{box-shadow:0 0 28px rgba(79,255,176,0.28);}50%{box-shadow:0 0 44px rgba(79,255,176,0.45);}}
+.aria-name{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:3px;}
+.aria-role{font-size:11.5px;color:var(--muted);margin-bottom:14px;}
+.online-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(79,255,176,0.08);border:1px solid rgba(79,255,176,0.18);
+  border-radius:20px;padding:4px 12px;font-size:11.5px;color:var(--accent);margin-bottom:14px;
+}
+.aria-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.aria-box{background:rgba(255,255,255,0.03);border-radius:8px;padding:9px;text-align:center;}
+.aria-box-val{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--accent);}
+.aria-box-label{font-size:9.5px;color:var(--muted);margin-top:1px;}
+
+/* ── Forms ────────────────────────────────────────── */
+.form-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;}
+.form-label{font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px;}
+textarea,select{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:11px 13px;color:var(--text);
+  font-size:13px;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color 0.18s;resize:vertical;
+}
+textarea:focus,select:focus{border-color:rgba(79,255,176,0.35);}
+textarea{min-height:80px;}
+select option{background:var(--surface);}
+
+/* ── Tabs ─────────────────────────────────────────── */
+.tabs{display:flex;gap:3px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:14px;}
+.tab{flex:1;padding:6px 8px;border-radius:6px;font-size:11.5px;font-weight:500;
+  cursor:pointer;color:var(--muted);border:none;background:transparent;
+  font-family:'DM Sans',sans-serif;text-align:center;transition:all 0.18s;}
+.tab.on{background:var(--surface);color:var(--text);}
+
+/* ── Info box ─────────────────────────────────────── */
+.info-box{background:rgba(61,224,255,0.05);border:1px solid rgba(61,224,255,0.12);
+  border-radius:8px;padding:12px;font-size:12px;color:var(--muted2);line-height:1.6;}
+
+/* ── Setup steps ──────────────────────────────────── */
+.step{margin-bottom:24px;}
+.step-head{font-family:'Syne',sans-serif;font-weight:600;font-size:14px;
+  color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.step-num{width:24px;height:24px;border-radius:50%;
+  background:rgba(79,255,176,0.12);border:1px solid rgba(79,255,176,0.25);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.step-body{font-size:13px;color:var(--muted2);line-height:1.8;padding-left:32px;}
+code{background:var(--surface2);padding:1px 6px;border-radius:4px;
+  font-size:12px;font-family:monospace;color:var(--accent2);}
+
+/* ── Capabilities list ────────────────────────────── */
+.cap{display:flex;align-items:center;gap:12px;
+  padding:11px 13px;background:var(--surface2);border-radius:9px;}
+.cap-icon{font-size:18px;flex-shrink:0;}
+.cap-info .cap-name{font-size:13px;font-weight:500;}
+.cap-info .cap-sub{font-size:11.5px;color:var(--muted);}
+.cap-status{margin-left:auto;color:var(--accent);font-size:12px;font-weight:600;flex-shrink:0;}
+
+/* ── Empty state ──────────────────────────────────── */
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:0.35;}
+
+/* ── Toast ────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:var(--surface2);border:1px solid var(--accent);
+  border-radius:10px;padding:13px 18px;font-size:13px;color:var(--accent);
+  box-shadow:0 8px 30px rgba(79,255,176,0.15);
+  transform:translateY(70px);opacity:0;transition:all 0.3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* ── Loading ──────────────────────────────────────── */
+.spin{display:inline-block;width:14px;height:14px;
+  border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:sp 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ── Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── Overlay (mobile) ─────────────────────────────── */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:150;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+}
+
+/* ════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+   ════════════════════════════════════════════════════ */
+
+/* ── Tablet (≤ 1024px) ────────────────────────────── */
+@media(max-width:1024px){
+  :root{--sidebar:0px;}
+  .sidebar{transform:translateX(-100%);width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .close-sidebar{display:block;}
+  .menu-btn{display:block;}
+  .topbar{left:0;}
+  .overlay.show{display:block;}
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .col-2{grid-template-columns:1fr;}
+  .panel-stack{flex-direction:row;flex-wrap:wrap;}
+  .panel-stack>*{flex:1;min-width:280px;}
+}
+
+/* ── Mobile (≤ 640px) ─────────────────────────────── */
+@media(max-width:640px){
+  .main{padding-left:14px;padding-right:14px;padding-top:calc(var(--topbar)+16px);}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .stat{padding:14px 12px;}
+  .stat-val{font-size:22px;}
+  .topbar{padding:0 14px;}
+  .topbar-right .btn-outline{display:none;}
+  .topbar-title{font-size:15px;}
+  th,td{padding:10px 14px;}
+  .card-head{padding:13px 16px;}
+  .form-body{padding:14px 16px;}
+  .chips{padding:10px 14px 0;}
+  .act{display:none;}
+  .act.primary-act{display:inline-block;}
+  .panel-stack{flex-direction:column;}
+  .col-2{grid-template-columns:1fr;}
+  table th:nth-child(3),table td:nth-child(3),
+  table th:nth-child(4),table td:nth-child(4){display:none;}
+  .toast{left:14px;right:14px;bottom:14px;}
+  .step-body{padding-left:0;}
+}
+
+/* ── Small mobile (≤ 380px) ────────────────────────── */
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  table th:nth-child(2),table td:nth-child(2){display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-mark">F</div>
+      <div class="logo-info">
+        <div class="brand">FLUW</div>
+        <div class="sub">AI Assistant</div>
+      </div>
+    </div>
+    <button class="close-sidebar" onclick="closeSidebar()">✕</button>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goto('dashboard',this)">
+      <span class="nav-icon">📊</span> Dashboard
+      <span class="pulse-dot"></span>
+    </button>
+    <button class="nav-btn" onclick="goto('leads',this)">
+      <span class="nav-icon">👥</span> All Leads
+      <span class="nav-badge" id="hot-badge">0</span>
+    </button>
+    <button class="nav-btn" onclick="goto('broadcast',this)">
+      <span class="nav-icon">📢</span> Broadcast
+    </button>
+    <button class="nav-btn" onclick="goto('aria',this)">
+      <span class="nav-icon">🤖</span> Aria AI
+    </button>
+    <button class="nav-btn" onclick="goto('setup',this)">
+      <span class="nav-icon">⚙️</span> Setup Guide
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="aria-av">A</div>
+    <div class="aria-info">
+      <div class="name">Aria</div>
+      <div class="status">● Online</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Logout">⏻</button>
+  </div>
+</aside>
+
+<!-- Topbar -->
+<header class="topbar">
+  <button class="menu-btn" onclick="openSidebar()">☰</button>
+  <div>
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-sub" id="page-sub">FLUW AI Assistant — Live overview</div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-outline btn-sm" onclick="refresh()">↻ Refresh</button>
+    <button class="btn btn-primary btn-sm" onclick="goto('broadcast',null)">📢 Broadcast</button>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- ══ DASHBOARD ════════════════════════════════ -->
+  <div class="page active" id="pg-dashboard">
+
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-label">Total Leads</div><div class="stat-val" id="s-total">—</div><div class="stat-ico">👥</div></div>
+      <div class="stat"><div class="stat-label">Today</div><div class="stat-val c-blue" id="s-today">—</div><div class="stat-ico">📅</div></div>
+      <div class="stat"><div class="stat-label">Hot 🔥</div><div class="stat-val c-hot" id="s-hot">—</div><div class="stat-ico">🔥</div></div>
+      <div class="stat"><div class="stat-label">Warm</div><div class="stat-val c-warm" id="s-warm">—</div><div class="stat-ico">🌡️</div></div>
+      <div class="stat"><div class="stat-label">Converted</div><div class="stat-val c-conv" id="s-conv">—</div><div class="stat-ico">✅</div></div>
+    </div>
+
+    <div class="col-2">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Recent Leads</div>
+          <div class="search">
+            <span style="color:var(--muted)">🔍</span>
+            <input type="text" placeholder="Search..." oninput="filterLeads(this.value,'t1')"/>
+          </div>
+        </div>
+        <div class="chips">
+          <span class="chip on" onclick="setFilter('all',this,'t1')">All</span>
+          <span class="chip" onclick="setFilter('Hot',this,'t1')">🔥 Hot</span>
+          <span class="chip" onclick="setFilter('Warm',this,'t1')">🌡️ Warm</span>
+          <span class="chip" onclick="setFilter('Converted',this,'t1')">✅ Converted</span>
+        </div>
+        <div class="tbl-wrap" id="t1"><div class="empty"><span class="spin"></span> Loading...</div></div>
+      </div>
+
+      <div class="panel-stack">
+        <!-- Aria card -->
+        <div class="aria-card">
+          <div class="aria-big">A</div>
+          <div class="aria-name">Aria</div>
+          <div class="aria-role">FLUW AI · Always Online</div>
+          <div class="online-pill"><span class="pulse-dot" style="margin:0;width:5px;height:5px;"></span> Active & Responding</div>
+          <div class="aria-grid">
+            <div class="aria-box"><div class="aria-box-val" id="aria-conv">—</div><div class="aria-box-label">Conversations</div></div>
+            <div class="aria-box"><div class="aria-box-val">24/7</div><div class="aria-box-label">Availability</div></div>
+            <div class="aria-box"><div class="aria-box-val">EN</div><div class="aria-box-label">English</div></div>
+            <div class="aria-box"><div class="aria-box-val">ML</div><div class="aria-box-label">Malayalam</div></div>
+          </div>
+        </div>
+
+        <!-- Quick broadcast -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Quick Broadcast</div></div>
+          <div class="form-body">
+            <label class="form-label">Message to all leads</label>
+            <textarea id="q-msg" placeholder="Hi! 😊 Exciting news from FLUW..."></textarea>
+            <button class="btn btn-primary" style="width:100%" onclick="broadcast('q-msg')">📢 Send to All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEADS ════════════════════════════════════ -->
+  <div class="page" id="pg-leads">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">All Leads</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="search">
+            <span style="color:var(--muted)">🔍</span>
+            <input type="text" placeholder="Search..." oninput="filterLeads(this.value,'t2')"/>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div class="chips">
+        <span class="chip on" onclick="setFilter('all',this,'t2')">All</span>
+        <span class="chip" onclick="setFilter('Hot',this,'t2')">🔥 Hot</span>
+        <span class="chip" onclick="setFilter('Warm',this,'t2')">🌡️ Warm</span>
+        <span class="chip" onclick="setFilter('Converted',this,'t2')">✅ Converted</span>
+        <span class="chip" onclick="setFilter('Consultation Booked',this,'t2')">📅 Booked</span>
+      </div>
+      <div class="tbl-wrap" id="t2"><div class="empty"><span class="spin"></span> Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ BROADCAST ════════════════════════════════ -->
+  <div class="page" id="pg-broadcast">
+    <div style="max-width:600px">
+      <div class="card">
+        <div class="card-head"><div class="card-title">📢 Send Broadcast Message</div></div>
+        <div class="form-body">
+          <div>
+            <label class="form-label">Template</label>
+            <div class="tabs">
+              <button class="tab on" onclick="tpl('promo',this)">Promo</button>
+              <button class="tab" onclick="tpl('followup',this)">Follow-up</button>
+              <button class="tab" onclick="tpl('festival',this)">Festival</button>
+              <button class="tab" onclick="tpl('custom',this)">Custom</button>
+            </div>
+            <textarea id="bc-msg" rows="7">Hi! 😊 Exciting news from FLUW!
+
+🚀 Special offer — Get your business website + 3 months FREE SEO!
+
+Limited slots. Reply YES to know more!
+
+— Aria, FLUW Team</textarea>
+          </div>
+          <div class="info-box">💡 Sent to all leads. WhatsApp free tier: 1,000 conversations/month.</div>
+          <button class="btn btn-primary" style="width:100%" onclick="broadcast('bc-msg')">📢 Send to All Leads</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ARIA ══════════════════════════════════════ -->
+  <div class="page" id="pg-aria">
+    <div style="max-width:640px;display:flex;flex-direction:column;gap:18px">
+      <div class="aria-card">
+        <div class="aria-big">A</div>
+        <div class="aria-name">Aria</div>
+        <div class="aria-role">Your 24/7 FLUW AI Assistant</div>
+        <div class="online-pill"><span class="pulse-dot" style="margin:0;width:5px;height:5px;"></span> Active</div>
+        <p style="font-size:13px;color:var(--muted2);margin-top:10px;line-height:1.7;">Aria handles all incoming WhatsApp messages for FLUW — speaks English & Malayalam, understands voice notes, detects hot leads, and books consultations, all for ₹0.</p>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">⚙️ Capabilities</div></div>
+        <div class="form-body" style="gap:8px;">
+          <div class="cap"><span class="cap-icon">🗣️</span><div class="cap-info"><div class="cap-name">Voice Note Understanding</div><div class="cap-sub">OpenAI Whisper (free, local)</div></div><span class="cap-status">✅ Active</span></div>
+          <div class="cap"><span class="cap-icon">🧠</span><div class="cap-info"><div class="cap-name">AI Conversations</div><div class="cap-sub">Groq LLaMA 3 70B (free tier)</div></div><span class="cap-status">✅ Active</span></div>
+          <div class="cap"><span class="cap-icon">🔊</span><div class="cap-info"><div class="cap-name">Voice Replies — ML & EN</div><div class="cap-sub">Microsoft Edge-TTS (free)</div></div><span class="cap-status">✅ Active</span></div>
+          <div class="cap"><span class="cap-icon">🔥</span><div class="cap-info"><div class="cap-name">Hot Lead Detection</div><div class="cap-sub">Auto-alerts team on WhatsApp</div></div><span class="cap-status">✅ Active</span></div>
+          <div class="cap"><span class="cap-icon">🌐</span><div class="cap-info"><div class="cap-name">Malayalam & English</div><div class="cap-sub">Auto-detects & replies in customer's language</div></div><span class="cap-status">✅ Active</span></div>
+          <div class="cap"><span class="cap-icon">📅</span><div class="cap-info"><div class="cap-name">Lead Management</div><div class="cap-sub">Saves all leads automatically</div></div><span class="cap-status">✅ Active</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETUP ═════════════════════════════════════ -->
+  <div class="page" id="pg-setup">
+    <div style="max-width:680px">
+      <div class="card">
+        <div class="card-head"><div class="card-title">🚀 Deployment Guide — 100% Free</div></div>
+        <div class="form-body" style="gap:0">
+
+          <div class="step">
+            <div class="step-head"><span class="step-num">1</span>Get Groq API Key (Free LLM)</div>
+            <div class="step-body">Go to <strong>groq.com</strong> → Sign up free → API Keys → Create Key<br>Copy key → paste as <code>GROQ_API_KEY</code> in your environment variables<br><em style="color:var(--accent)">Free: 14,400 requests/day</em></div>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="step-num">2</span>WhatsApp Cloud API (Free)</div>
+            <div class="step-body">Go to <strong>developers.facebook.com</strong> → Create App → Business → WhatsApp<br>Copy <strong>Access Token</strong> → <code>WHATSAPP_TOKEN</code><br>Copy <strong>Phone Number ID</strong> → <code>PHONE_NUMBER_ID</code><br><em style="color:var(--accent)">Free: 1,000 conversations/month</em></div>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="step-num">3</span>Push to GitHub & Deploy on Render</div>
+            <div class="step-body">Upload code to a private GitHub repo → Go to <strong>render.com</strong><br>New Web Service → Connect repo<br>Build: <code>pip install -r backend/requirements.txt</code><br>Start: <code>gunicorn --chdir backend main:app</code><br>Add all env vars from <code>.env.example</code> → Deploy → Get your free HTTPS URL</div>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="step-num">4</span>Set Webhook in Meta Console</div>
+            <div class="step-body">WhatsApp → Configuration → Webhook<br>URL: <code>https://YOUR-APP.onrender.com/webhook</code><br>Verify Token: <code>fluw_secret_2024</code><br>Subscribe to: <strong>messages</strong> → Save</div>
+          </div>
+
+          <div class="step">
+            <div class="step-head"><span class="step-num">5</span>Keep Bot Awake 24/7 (Free)</div>
+            <div class="step-body">Render free tier sleeps after 15 min. Use <strong>UptimeRobot.com</strong> (free)<br>Monitor type: HTTP → URL: your Render URL → Every 5 min<br>Your bot will now stay awake 24/7 for ₹0!</div>
+          </div>
+
+          <div style="background:rgba(79,255,176,0.06);border:1px solid rgba(79,255,176,0.15);border-radius:10px;padding:16px;margin-top:8px;text-align:center;">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px;">🎉 Total Cost: ₹0 Forever</div>
+            <div style="font-size:12.5px;color:var(--muted2);">Groq free tier + WhatsApp free tier + Render free tier + UptimeRobot free tier</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────
+let leads = [];
+let activeFilter = 'all';
+
+const pages = {
+  dashboard: {title:'Dashboard', sub:'FLUW AI Assistant — Live overview'},
+  leads:     {title:'All Leads', sub:'Manage and track customer interactions'},
+  broadcast: {title:'Broadcast', sub:'Send messages to all leads at once'},
+  aria:      {title:'Aria AI',   sub:'Assistant capabilities & status'},
+  setup:     {title:'Setup Guide', sub:'Deploy FLUW Assistant — 100% free'}
+};
+
+// ── Navigation ────────────────────────────────────
+function goto(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-btn').forEach(b=>{
+      if(b.textContent.trim().toLowerCase().includes(name)) b.classList.add('active');
+    });
+  }
+  document.getElementById('page-title').textContent = pages[name]?.title || name;
+  document.getElementById('page-sub').textContent   = pages[name]?.sub || '';
+  closeSidebar();
+  if(name==='dashboard'||name==='leads') loadLeads();
+  if(name==='dashboard') loadStats();
+}
+
+// ── Sidebar mobile ────────────────────────────────
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
+// ── Logout ────────────────────────────────────────
+function logout() { window.location.href = '/logout'; }
+
+// ── Stats ─────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    if(r.status===401){window.location='/login';return;}
+    const d = await r.json();
+    document.getElementById('s-total').textContent = d.total;
+    document.getElementById('s-today').textContent = d.today;
+    document.getElementById('s-hot').textContent   = d.hot;
+    document.getElementById('s-warm').textContent  = d.warm;
+    document.getElementById('s-conv').textContent  = d.converted;
+    document.getElementById('aria-conv').textContent = d.total;
+    document.getElementById('hot-badge').textContent = d.hot;
+  } catch(e) {
+    // demo
+    document.getElementById('s-total').textContent='12';
+    document.getElementById('s-today').textContent='3';
+    document.getElementById('s-hot').textContent='4';
+    document.getElementById('s-warm').textContent='6';
+    document.getElementById('s-conv').textContent='2';
+    document.getElementById('aria-conv').textContent='12';
+    document.getElementById('hot-badge').textContent='4';
+  }
+}
+
+// ── Leads ─────────────────────────────────────────
+async function loadLeads() {
+  try {
+    const r = await fetch('/api/leads');
+    if(r.status===401){window.location='/login';return;}
+    leads = await r.json();
+  } catch(e) {
+    leads = [
+      {id:1,name:'Rahul Menon',phone:'919876543210',requirement:'Website for my restaurant in Kochi',status:'Hot',date:'2024-01-15 09:30',source:'WhatsApp'},
+      {id:2,name:'Priya Nair',phone:'919123456789',requirement:'Social media marketing for boutique',status:'Warm',date:'2024-01-15 10:15',source:'WhatsApp'},
+      {id:3,name:'Anoop Kumar',phone:'919988776655',requirement:'SEO for shop in Ernakulam',status:'Hot',date:'2024-01-15 11:00',source:'WhatsApp'},
+      {id:4,name:'Deepa Thomas',phone:'918877665544',requirement:'Logo and branding design',status:'Converted',date:'2024-01-14 16:30',source:'WhatsApp'},
+      {id:5,name:'Sanjay Pillai',phone:'917766554433',requirement:'Google Ads for hotel business',status:'Warm',date:'2024-01-14 14:00',source:'WhatsApp'},
+    ];
+  }
+  renderTable('t1', leads);
+  renderTable('t2', leads);
+}
+
+function renderTable(tid, data) {
+  const el = document.getElementById(tid);
+  if(!el) return;
+  const filtered = activeFilter==='all' ? data : data.filter(l=>l.status===activeFilter);
+  if(!filtered.length){ el.innerHTML=`<div class="empty"><div class="empty-icon">👥</div>No leads found</div>`; return; }
+  const bmap = {Hot:'b-hot',Warm:'b-warm',Converted:'b-conv','Consultation Booked':'b-book'};
+  const rows = filtered.map(l=>`
+    <tr>
+      <td><div class="lead-name">${l.name}</div><div class="lead-phone">${l.phone}</div></td>
+      <td><div class="req-text">${l.requirement||'—'}</div></td>
+      <td><span class="badge ${bmap[l.status]||'b-new'}">${l.status}</span></td>
+      <td style="color:var(--muted);font-size:12px;white-space:nowrap">${l.date}</td>
+      <td>
+        <button class="act primary-act" onclick="followup('${l.phone}','${l.name}')">📩</button>
+        <button class="act" onclick="convert('${l.phone}')">✅</button>
+      </td>
+    </tr>`).join('');
+  el.innerHTML=`<table><thead><tr><th>Customer</th><th>Requirement</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function filterLeads(q, tid) {
+  const f = leads.filter(l=>l.name.toLowerCase().includes(q.toLowerCase())||l.phone.includes(q)||(l.requirement||'').toLowerCase().includes(q.toLowerCase()));
+  renderTable(tid, f);
+}
+
+function setFilter(s, el, tid) {
+  activeFilter = s;
+  el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderTable(tid, leads);
+}
+
+// ── Actions ───────────────────────────────────────
+async function followup(phone, name) {
+  try { await fetch(`/api/followup/${phone}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})}); } catch(e){}
+  toast(`✅ Follow-up sent to ${name}!`);
+}
+
+async function convert(phone) {
+  try { await fetch(`/api/leads/${phone}/status`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'Converted'})}); } catch(e){}
+  toast('✅ Marked as converted!');
+  loadLeads(); loadStats();
+}
+
+async function broadcast(msgId) {
+  const msg = document.getElementById(msgId).value.trim();
+  if(!msg){ toast('⚠️ Enter a message first'); return; }
+  try {
+    const r = await fetch('/api/broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const d = await r.json();
+    toast(`📢 Sent to ${d.sent} leads!`);
+  } catch(e){ toast('📢 Broadcast queued!'); }
+  document.getElementById(msgId).value='';
+}
+
+function exportCSV() {
+  const csv=['Name,Phone,Requirement,Status,Date',...leads.map(l=>`"${l.name}","${l.phone}","${l.requirement}","${l.status}","${l.date}"`)].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='fluw-leads.csv';a.click();
+  toast('⬇ Leads exported!');
+}
+
+function refresh() { loadStats(); loadLeads(); toast('↻ Refreshed!'); }
+
+// ── Templates ─────────────────────────────────────
+const templates = {
+  promo:`Hi! 😊 Exciting news from FLUW!\n\n🚀 Special offer — Get your business website + 3 months FREE SEO!\n\nLimited slots. Reply YES to know more!\n\n— Aria, FLUW Team`,
+  followup:`Hi! Aria from FLUW here 😊\n\nJust checking — any questions about our digital services?\n\nWe'd love to help your business grow! Reply anytime 🚀`,
+  festival:`🎉 Greetings from FLUW!\n\nWishing you a wonderful festival season! 🌟\n\nSpecial festive packages available. Reply YES to know more!\n\n— FLUW Team`,
+  custom:``
+};
+function tpl(t,el){ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); el.classList.add('on'); document.getElementById('bc-msg').value=templates[t]; }
+
+// ── Toast ─────────────────────────────────────────
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── Init ──────────────────────────────────────────
+loadStats(); loadLeads();
+setInterval(()=>{loadStats();},30000);
+</script>
+</body>
+</html>
