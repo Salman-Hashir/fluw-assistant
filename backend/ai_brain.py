@@ -68,9 +68,11 @@ def get_ai_reply(user_id: str, user_message: str, customer_name: str = "Customer
         conversation_history[user_id] = []
     conversation_history[user_id].append({"role": "user", "content": user_message})
     history = conversation_history[user_id][-12:]
+    import logging
+    logger = logging.getLogger(__name__)
     try:
         response = client.chat.completions.create(
-            model="llama3-70b-8192",
+            model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT + f"\n\nCurrent customer: {customer_name}"},
                 *history
@@ -82,7 +84,7 @@ def get_ai_reply(user_id: str, user_message: str, customer_name: str = "Customer
         save_history()
         return reply
     except Exception as e:
-        print(f"AI error: {e}")
+        logger.error(f"🛑 GROQ AI error: {e}")
         return "Hi! 😊 I'm Aria from FLUW. How can I help you today?"
 
 def detect_hot_lead(message: str) -> bool:
