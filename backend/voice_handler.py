@@ -1,11 +1,11 @@
-import whisper, edge_tts, asyncio, os, requests, logging
+import edge_tts, asyncio, os, requests, logging
+from groq import Groq
+from config import GROQ_API_KEY
+
 logger = logging.getLogger(__name__)
 
-try:
-    model = whisper.load_model("base")
-    logger.info("Whisper loaded")
-except Exception as e:
-    logger.error(f"Whisper error: {e}"); model = None
+# Initialize Groq client for Whisper API
+client = Groq(api_key=GROQ_API_KEY)
 
 VOICES = {
     'malayalam_female': 'ml-IN-SobhanaNeural',
@@ -15,10 +15,14 @@ VOICES = {
 }
 
 def voice_note_to_text(audio_file_path: str) -> str:
-    if not model: return "Voice message received"
     try:
-        result = model.transcribe(audio_file_path, language=None)
-        return result['text'].strip()
+        with open(audio_file_path, "rb") as file:
+            transcription = client.audio.transcriptions.create(
+                file=(audio_file_path, file.read()),
+                model="whisper-large-v3",
+                response_format="json",
+            )
+            return transcription.text.strip()
     except Exception as e:
         logger.error(f"Transcription error: {e}")
         return "Voice message received."
