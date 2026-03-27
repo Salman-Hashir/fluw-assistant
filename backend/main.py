@@ -124,7 +124,14 @@ def send_whatsapp_text(to, message):
     url     = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
     headers = {'Authorization': f'Bearer {WHATSAPP_TOKEN}', 'Content-Type': 'application/json'}
     data    = {'messaging_product': 'whatsapp', 'to': to, 'type': 'text', 'text': {'body': message}}
-    requests.post(url, headers=headers, json=data)
+    try:
+        logger.info(f"Attempting to send text to {to}...")
+        res = requests.post(url, headers=headers, json=data)
+        res.raise_for_status()
+        logger.info(f"Successfully sent! Meta API Response: {res.json()}")
+    except Exception as e:
+        logger.error(f"Failed to send text to {to}. Error: {e}")
+        if 'res' in locals(): logger.error(f"Meta Graph Details: {res.text}")
 
 def send_whatsapp_voice(to, audio_path):
     try:
@@ -133,14 +140,18 @@ def send_whatsapp_voice(to, audio_path):
         with open(audio_path, 'rb') as f:
             res = requests.post(upload_url, headers=headers,
                 files={'file': ('reply.mp3', f, 'audio/mpeg')},
-                data={'messaging_product': 'whatsapp'}).json()
-        media_id = res.get('id')
+                data={'messaging_product': 'whatsapp'})
+            res.raise_for_status()
+        media_id = res.json().get('id')
         if not media_id: return
         url  = f"https://graph.facebook.com/v18.0/{PHONE_NUMBER_ID}/messages"
         data = {'messaging_product': 'whatsapp', 'to': to, 'type': 'audio', 'audio': {'id': media_id}}
-        requests.post(url, headers=headers, json=data)
+        r2 = requests.post(url, headers=headers, json=data)
+        r2.raise_for_status()
+        logger.info(f"Successfully sent voice to {to}")
     except Exception as e:
         logger.error(f"Voice send error: {e}")
+        if 'res' in locals(): logger.error(rf"Meta Graphic Details: {res.text}")
 
 # ── API Endpoints ──────────────────────────────────────────────
 @app.route('/api/leads', methods=['GET'])
