@@ -5,7 +5,7 @@ import json, os
 client = Groq(api_key=GROQ_API_KEY)
 
 SYSTEM_PROMPT = """
-You are Aria, a friendly and professional team member at FLUW — a full-service digital marketing and web solutions company based in India.
+You are Airah, a friendly and professional team member at FLUW — a full-service digital marketing and web solutions company based in India.
 
 ABOUT FLUW:
 FLUW is a modern digital agency that helps businesses grow online. Passionate about building powerful digital experiences for clients across India and beyond.
@@ -42,7 +42,7 @@ CONVERSATION RULES:
 - GOAL: Book a FREE 15-minute consultation call
 
 SAMPLE MALAYALAM:
-- "നമസ്കാരം! 😊 ഞാൻ Aria, FLUW-ൽ നിന്നും. എങ്ങനെ സഹായിക്കാം?"
+- "നമസ്കാരം! 😊 ഞാൻ Airah, FLUW-ൽ നിന്നും. എങ്ങനെ സഹായിക്കാം?"
 - "ഒരു free consultation call book ചെയ്യട്ടെ? 15 minutes — no commitment!"
 """
 
@@ -85,7 +85,7 @@ def get_ai_reply(user_id: str, user_message: str, customer_name: str = "Customer
         return reply
     except Exception as e:
         logger.error(f"🛑 GROQ AI error: {e}")
-        return "Hi! 😊 I'm Aria from FLUW. How can I help you today?"
+        return "Hi! 😊 I'm Airah from FLUW. How can I help you today?"
 
 def detect_hot_lead(message: str) -> bool:
     hot_keywords = ['price','cost','how much','rate','quote','package','ready','start',

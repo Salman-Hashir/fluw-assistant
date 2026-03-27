@@ -116,7 +116,7 @@ Dashboard features:
 - 📊 Live stats (total, hot, warm, converted leads)
 - 👥 All leads table with search & filter
 - 📢 Broadcast messages to all leads
-- 🤖 Aria AI capabilities view
+- 🤖 Airah AI capabilities view
 - ⚙️ Setup guide built-in
 
 ---

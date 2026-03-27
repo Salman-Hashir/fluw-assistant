@@ -195,7 +195,7 @@ def api_broadcast():
 @api_login_required
 def api_followup(phone):
     name    = request.json.get('name', 'there')
-    message = f"Hi {name}! 😊 Aria here from FLUW. Just checking if you had any questions about our services! We'd love to help your business grow online. 🚀"
+    message = f"Hi {name}! 😊 Airah here from FLUW. Just checking if you had any questions about our services! We'd love to help your business grow online. 🚀"
     send_whatsapp_text(phone, message)
     return jsonify({'success': True})
 

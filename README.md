@@ -1,4 +1,4 @@
-# 🚀 FLUW AI Assistant v2 — Aria
+# 🚀 FLUW AI Assistant v2 — Airah
 
 > WhatsApp AI Assistant for FLUW Digital Agency
 > Secure Login | English & Malayalam | Fully Responsive | ₹0

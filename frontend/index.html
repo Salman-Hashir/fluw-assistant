@@ -202,7 +202,7 @@ tr:hover td{background:rgba(255,255,255,0.015);}
 /* ── Right column panels ──────────────────────────── */
 .panel-stack{display:flex;flex-direction:column;gap:18px;}
 
-/* ── Aria card ────────────────────────────────────── */
+/* ── Airah card ────────────────────────────────────── */
 .aria-card{
   background:linear-gradient(135deg,rgba(79,255,176,0.04),rgba(61,224,255,0.04));
   border:1px solid rgba(79,255,176,0.12);
@@ -383,7 +383,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:4px;
       <span class="nav-icon">📢</span> Broadcast
     </button>
     <button class="nav-btn" onclick="goto('aria',this)">
-      <span class="nav-icon">🤖</span> Aria AI
+      <span class="nav-icon">🤖</span> Airah AI
     </button>
     <button class="nav-btn" onclick="goto('setup',this)">
       <span class="nav-icon">⚙️</span> Setup Guide
@@ -393,7 +393,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:4px;
   <div class="sidebar-footer">
     <div class="aria-av">A</div>
     <div class="aria-info">
-      <div class="name">Aria</div>
+      <div class="name">Airah</div>
       <div class="status">● Online</div>
     </div>
     <button class="logout-btn" onclick="logout()" title="Logout">⏻</button>
@@ -446,10 +446,10 @@ code{background:var(--surface2);padding:1px 6px;border-radius:4px;
       </div>
 
       <div class="panel-stack">
-        <!-- Aria card -->
+        <!-- Airah card -->
         <div class="aria-card">
           <div class="aria-big">A</div>
-          <div class="aria-name">Aria</div>
+          <div class="aria-name">Airah</div>
           <div class="aria-role">FLUW AI · Always Online</div>
           <div class="online-pill"><span class="pulse-dot" style="margin:0;width:5px;height:5px;"></span> Active & Responding</div>
           <div class="aria-grid">
@@ -517,7 +517,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:4px;
 
 Limited slots. Reply YES to know more!
 
-— Aria, FLUW Team</textarea>
+— Airah, FLUW Team</textarea>
           </div>
           <div class="info-box">💡 Sent to all leads. WhatsApp free tier: 1,000 conversations/month.</div>
           <button class="btn btn-primary" style="width:100%" onclick="broadcast('bc-msg')">📢 Send to All Leads</button>
@@ -531,10 +531,10 @@ Limited slots. Reply YES to know more!
     <div style="max-width:640px;display:flex;flex-direction:column;gap:18px">
       <div class="aria-card">
         <div class="aria-big">A</div>
-        <div class="aria-name">Aria</div>
+        <div class="aria-name">Airah</div>
         <div class="aria-role">Your 24/7 FLUW AI Assistant</div>
         <div class="online-pill"><span class="pulse-dot" style="margin:0;width:5px;height:5px;"></span> Active</div>
-        <p style="font-size:13px;color:var(--muted2);margin-top:10px;line-height:1.7;">Aria handles all incoming WhatsApp messages for FLUW — speaks English & Malayalam, understands voice notes, detects hot leads, and books consultations, all for ₹0.</p>
+        <p style="font-size:13px;color:var(--muted2);margin-top:10px;line-height:1.7;">Airah handles all incoming WhatsApp messages for FLUW — speaks English & Malayalam, understands voice notes, detects hot leads, and books consultations, all for ₹0.</p>
       </div>
       <div class="card">
         <div class="card-head"><div class="card-title">⚙️ Capabilities</div></div>
@@ -606,7 +606,7 @@ const pages = {
   dashboard: {title:'Dashboard', sub:'FLUW AI Assistant — Live overview'},
   leads:     {title:'All Leads', sub:'Manage and track customer interactions'},
   broadcast: {title:'Broadcast', sub:'Send messages to all leads at once'},
-  aria:      {title:'Aria AI',   sub:'Assistant capabilities & status'},
+  aria:      {title:'Airah AI',   sub:'Assistant capabilities & status'},
   setup:     {title:'Setup Guide', sub:'Deploy FLUW Assistant — 100% free'}
 };
 
@@ -744,8 +744,8 @@ function refresh() { loadStats(); loadLeads(); toast('↻ Refreshed!'); }
 
 // ── Templates ─────────────────────────────────────
 const templates = {
-  promo:`Hi! 😊 Exciting news from FLUW!\n\n🚀 Special offer — Get your business website + 3 months FREE SEO!\n\nLimited slots. Reply YES to know more!\n\n— Aria, FLUW Team`,
-  followup:`Hi! Aria from FLUW here 😊\n\nJust checking — any questions about our digital services?\n\nWe'd love to help your business grow! Reply anytime 🚀`,
+  promo:`Hi! 😊 Exciting news from FLUW!\n\n🚀 Special offer — Get your business website + 3 months FREE SEO!\n\nLimited slots. Reply YES to know more!\n\n— Airah, FLUW Team`,
+  followup:`Hi! Airah from FLUW here 😊\n\nJust checking — any questions about our digital services?\n\nWe'd love to help your business grow! Reply anytime 🚀`,
   festival:`🎉 Greetings from FLUW!\n\nWishing you a wonderful festival season! 🌟\n\nSpecial festive packages available. Reply YES to know more!\n\n— FLUW Team`,
   custom:``
 };
